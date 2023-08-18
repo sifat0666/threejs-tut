@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import gsap from "gsap";
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -12,7 +13,18 @@ const scene = new THREE.Scene();
 const geometry = new THREE.BoxGeometry(1, 1, 1);
 const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 const group = new THREE.Group();
-scene.add(group);
+// scene.add(group);
+
+const mesh = new THREE.Mesh(
+  new THREE.BoxGeometry(1, 1, 1),
+  new THREE.MeshBasicMaterial({ color: "red" })
+);
+
+// mesh.position.x = 2;
+
+mesh.rotation.x = 0.5;
+
+scene.add(mesh);
 
 const mesh1 = new THREE.Mesh(
   new THREE.BoxGeometry(1, 1, 1),
@@ -42,7 +54,7 @@ group.position.y = 1;
 
 const axesHelper = new THREE.AxesHelper(2);
 
-scene.add(axesHelper);
+// scene.add(axesHelper);
 
 /**
  * Sizes
@@ -71,20 +83,22 @@ const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
 });
 renderer.setSize(sizes.width, sizes.height);
-renderer.render(scene, camera);
 
-// const clock = new THREE.Clock();
+// gsap.to(mesh.position, { duration: 1, delay: 1, x: 2 });
+// renderer.render(scene, camera);
 
-// const tick = () => {
-//   const elapsedTime = clock.getElapsedTime();
-//   console.log("elapsed time: " + elapsedTime);
-//   group.rotation.y = elapsedTime;
-//   group.rotation.x = elapsedTime;
-//   group.position.y = Math.sin(elapsedTime);
-//   camera.lookAt(group.position);
-//   renderer.render(scene, camera);
+const clock = new THREE.Clock();
 
-//   window.requestAnimationFrame(tick);
-// };
+const tick = () => {
+  const elapsedTime = clock.getElapsedTime();
+  console.log("elapsed time: " + elapsedTime);
+  mesh.rotation.y = elapsedTime;
+  // group.rotation.x = elapsedTime;
+  // group.position.y = Math.sin(elapsedTime);
+  // camera.lookAt(group.position);
+  renderer.render(scene, camera);
 
-// tick();
+  window.requestAnimationFrame(tick);
+};
+
+tick();
