@@ -1,8 +1,5 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import gsap from "gsap";
-import * as dat from "dat.gui";
-import imageSource from "/door.jpg";
 
 /**
  * Base
@@ -13,49 +10,69 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-//texture
+/**
+ * Textures
+ */
 const loadingManager = new THREE.LoadingManager();
+loadingManager.onStart = () => {
+  console.log("loadingManager: loading started");
+};
+loadingManager.onLoad = () => {
+  console.log("loadingManager: loading finished");
+};
+loadingManager.onProgress = () => {
+  console.log("loadingManager: loading progressing");
+};
+loadingManager.onError = () => {
+  console.log("loadingManager: loading error");
+};
+
 const textureLoader = new THREE.TextureLoader(loadingManager);
-const texture = textureLoader.load(
-  "/door.jpg",
+
+// const colorTexture = textureLoader.load('/textures/checkerboard-1024x1024.png')
+// const colorTexture = textureLoader.load('/textures/checkerboard-2x2.png')
+const colorTexture = textureLoader.load(
+  "/textures/minecraft.png",
   () => {
-    console.log("loaded texture");
+    console.log("textureLoader: loading finished");
   },
   () => {
-    console.log("progress");
+    console.log("textureLoader: loading progressing");
   },
   () => {
-    console.log("error loading");
+    console.log("textureLoader: loading error");
   }
 );
+colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+// colorTexture.repeat.x = 2
+// colorTexture.repeat.y = 3
+// colorTexture.offset.x = 0.5
+// colorTexture.offset.y = 0.5
+// colorTexture.rotation = Math.PI * 0.25
+// colorTexture.center.x = 0.5
+// colorTexture.center.y = 0.5
+colorTexture.generateMipmaps = false;
+colorTexture.minFilter = THREE.NearestFilter;
+colorTexture.magFilter = THREE.NearestFilter;
+
+const alphaTexture = textureLoader.load("/textures/door/alpha.jpg");
+const heightTexture = textureLoader.load("/textures/door/height.jpg");
+const normalTexture = textureLoader.load("/textures/door/normal.jpg");
+const ambientOcclusionTexture = textureLoader.load(
+  "/textures/door/ambientOcclusion.jpg"
+);
+const metalnessTexture = textureLoader.load("/textures/door/metalness.jpg");
+const roughnessTexture = textureLoader.load("/textures/door/roughness.jpg");
 
 /**
  * Object
  */
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ map: texture });
+console.log(geometry.attributes);
+const material = new THREE.MeshBasicMaterial({ map: colorTexture });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
-
-const gui = new dat.GUI();
-gui.add(mesh.position, "y", -3, 3, 0.01);
-gui.add(mesh.position, "x", -3, 3, 0.01);
-gui.add(mesh.position, "z", -3, 3, 0.01);
-gui.add(mesh, "visible");
-gui.add(material, "wireframe");
-
-const parameters = {
-  color: 0xff0000,
-  spin: () => {
-    gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + 10 });
-  },
-};
-
-gui.addColor(parameters, "color").onChange(() => {
-  material.color.set(parameters.color);
-});
-
-gui.add(parameters, "spin");
 
 /**
  * Sizes
@@ -80,28 +97,6 @@ window.addEventListener("resize", () => {
 });
 
 /**
- * Fullscreen
- */
-window.addEventListener("dblclick", () => {
-  const fullscreenElement =
-    document.fullscreenElement || document.webkitFullscreenElement;
-
-  if (!fullscreenElement) {
-    if (canvas.requestFullscreen) {
-      canvas.requestFullscreen();
-    } else if (canvas.webkitRequestFullscreen) {
-      canvas.webkitRequestFullscreen();
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  }
-});
-
-/**
  * Camera
  */
 // Base camera
@@ -111,7 +106,9 @@ const camera = new THREE.PerspectiveCamera(
   0.1,
   100
 );
-camera.position.z = 3;
+camera.position.x = 1;
+camera.position.y = 1;
+camera.position.z = 1;
 scene.add(camera);
 
 // Controls
