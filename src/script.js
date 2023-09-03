@@ -2,8 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import gsap from "gsap";
 import * as dat from "dat.gui";
+import imageSource from "/door.jpg";
 
-const gui = new dat.GUI();
 /**
  * Base
  */
@@ -13,14 +13,31 @@ const canvas = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
+//texture
+const loadingManager = new THREE.LoadingManager();
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const texture = textureLoader.load(
+  "/door.jpg",
+  () => {
+    console.log("loaded texture");
+  },
+  () => {
+    console.log("progress");
+  },
+  () => {
+    console.log("error loading");
+  }
+);
+
 /**
  * Object
  */
 const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+const material = new THREE.MeshBasicMaterial({ map: texture });
 const mesh = new THREE.Mesh(geometry, material);
 scene.add(mesh);
 
+const gui = new dat.GUI();
 gui.add(mesh.position, "y", -3, 3, 0.01);
 gui.add(mesh.position, "x", -3, 3, 0.01);
 gui.add(mesh.position, "z", -3, 3, 0.01);
