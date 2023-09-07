@@ -1,70 +1,106 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import * as dat from "lil-gui";
-import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
-import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
-import typefaceFont from "three/examples/fonts/helvetiker_regular.typeface.json";
+
+const gui = new dat.GUI();
 
 /**
  * Base
  */
-// Debug
-const gui = new dat.GUI();
-
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
+
+/**
+ * Texttures
+ */
+const textureLoader = new THREE.TextureLoader();
+
+const doorColorTexture = textureLoader.load("/textures/door/color.jpg");
+const doorAlphaTexture = textureLoader.load("/textures/door/alpha.jpg");
+const doorAmbientOcculsionTexture = textureLoader.load(
+  "/textures/door/ambientOcculsion.jpg"
+);
+const doorHeightTexture = textureLoader.load("/textures/door/height.jpg");
+const doorNormalTexture = textureLoader.load("/textures/door/normal.jpg");
+const doorMetalNessTexture = textureLoader.load("/textures/door/metalness.jpg");
+const doorRoughNessTexture = textureLoader.load("/textures/door/roughness.jpg");
+
+const matcapTexture = textureLoader.load("/textures/matcaps/8.png");
+const gradianTexture = textureLoader.load("/textures/gradients/3.jpg");
+gradianTexture.minFilter = THREE.NearestFilter;
+gradianTexture.magFilter = THREE.NearestFilter;
+gradianTexture.generateMipmaps = false;
 
 // Scene
 const scene = new THREE.Scene();
 
-/**
- * Textures
- */
-const textureLoader = new THREE.TextureLoader();
-const matcapTexture = textureLoader.load("textures/matcaps/8.png");
+//Objects
+
+const material = new THREE.MeshStandardMaterial();
+
+// const material = new THREE.MeshToonMaterial();
+// material.gradientMap = gradianTexture;
+
+// const material = new THREE.MeshPhongMaterial();
+// material.shininess = 100 ;
+
+// material.matcap = matcapTexture;
+// material.flatShading = true;
+
+// const material = new THREE.MeshBasicMaterial();
+
+// material.transparent = true;
+// material.map = matcapTexture;
+// material.alphaMap = doorAlphaTexture;
+// material.side = THREE.DoubleSide;
+
+material.metalness = 0.3;
+material.roughness = 1.7;
+
+const sphere = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 10), material);
+const PlaneGeometry = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+const base = new THREE.Mesh(new THREE.PlaneGeometry(10, 10), material);
+
+base.position.y = -1;
+base.rotation.x = 5;
+
+const torus = new THREE.Mesh(
+  new THREE.TorusGeometry(0.5, 0.2, 16, 32),
+  material
+);
+PlaneGeometry.position.x = 2;
+torus.position.x = -2;
+
+scene.add(sphere);
+scene.add(torus);
+scene.add(PlaneGeometry);
+scene.add(base);
 
 /**
- * Fonts
+ * Lights
  */
-const fontLoader = new FontLoader();
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+scene.add(ambientLight);
 
-fontLoader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-  // Material
-  const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture });
+// const directionalLight = new THREE.DirectionalLight(0xff00ff, 0.3);
+// scene.add(directionalLight);
 
-  // Text
-  const textGeometry = new TextGeometry("Dounut House", {
-    font: font,
-    size: 0.5,
-    height: 0.2,
-    curveSegments: 12,
-    bevelEnabled: true,
-    bevelThickness: 0.03,
-    bevelSize: 0.02,
-    bevelOffset: 0,
-    bevelSegments: 5,
-  });
-  textGeometry.center();
+const hemisphereLight = new THREE.HemisphereLight(0xff00ff, 0x0000ff, 0.3);
+scene.add(hemisphereLight);
 
-  const text = new THREE.Mesh(textGeometry, material);
-  scene.add(text);
+const pointLight = new THREE.PointLight(0xffffff, 0.5);
+pointLight.position.x = 2;
+pointLight.position.y = 3;
+pointLight.position.x = 7;
 
-  // Donuts
-  const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 32, 64);
+scene.add(pointLight);
 
-  for (let i = 0; i < 100; i++) {
-    const donut = new THREE.Mesh(donutGeometry, material);
-    donut.position.x = (Math.random() - 0.5) * 10;
-    donut.position.y = (Math.random() - 0.5) * 10;
-    donut.position.z = (Math.random() - 0.5) * 10;
-    donut.rotation.x = Math.random() * Math.PI;
-    donut.rotation.y = Math.random() * Math.PI;
-    const scale = Math.random();
-    donut.scale.set(scale, scale, scale);
+const rectAreaLight = new THREE.RectAreaLight(0x4e00ff, 5, 4, 2);
+// scene.add(rectAreaLight);
 
-    scene.add(donut);
-  }
-});
+const spotLight = new THREE.SpotLight(0x78ff00, 1, 10, Math.PI * 0.12, 0.25, 1);
+spotLight.position.set(0, 2, 5);
+// scene.add(spotLight);
 
 /**
  * Sizes
@@ -100,7 +136,7 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.x = 1;
 camera.position.y = 1;
-camera.position.z = 2;
+camera.position.z = 8;
 scene.add(camera);
 
 // Controls
@@ -123,6 +159,15 @@ const clock = new THREE.Clock();
 
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
+
+  //update rotation
+  sphere.rotation.y = 0.1 * elapsedTime;
+  PlaneGeometry.rotation.y = 0.1 * elapsedTime;
+  torus.rotation.y = 0.1 * elapsedTime;
+
+  sphere.rotation.x = 0.1 * elapsedTime;
+  PlaneGeometry.rotation.x = 0.1 * elapsedTime;
+  torus.rotation.x = 0.1 * elapsedTime;
 
   // Update controls
   controls.update();
