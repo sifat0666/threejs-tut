@@ -37,13 +37,22 @@ monitorLoader.load("/GamingMoniter.glb", function (monitorModel) {
   scene.add(monitor);
 });
 
-// Create PC (placeholder as a box)
-const pcGeometry = new THREE.BoxGeometry(1, 0.75, 1);
-const pcMaterial = new THREE.MeshStandardMaterial({ color: "green" });
-const pc = new THREE.Mesh(pcGeometry, pcMaterial);
-pc.position.set(-1, 0.8, 0); // Adjust position as needed
-pc.scale.set(0.75, 4, 2); // Scale down the PC
-scene.add(pc);
+let pcl;
+const pcloader = new GLTFLoader();
+pcloader.load("/mac_pro.glb", function (monitorModel) {
+  pcl = monitorModel.scene;
+  pcl.position.set(-1.5, 0.1, 0); // Adjust position as needed
+  pcl.scale.set(2, 2, 2); // Scale down the PC
+  scene.add(pcl);
+});
+
+// // Create PC (placeholder as a box)
+// const pcGeometry = new THREE.BoxGeometry(1, 0.75, 1);
+// const pcMaterial = new THREE.MeshStandardMaterial({ color: "green" });
+// const pc = new THREE.Mesh(pcGeometry, pcMaterial);
+// pc.position.set(-1, 0.8, 0); // Adjust position as needed
+// pc.scale.set(0.75, 4, 2); // Scale down the PC
+// scene.add(pc);
 
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -68,7 +77,7 @@ function animate() {
   requestAnimationFrame(animate);
 
   // Rotate the whole scene
-  scene.rotation.y += 0.01; // Adjust rotation speed as needed
+  // scene.rotation.y += 0.01; // Adjust rotation speed as needed
 
   renderer.render(scene, camera);
 }
